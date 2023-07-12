@@ -62,6 +62,9 @@ class BookService(
         return bookRepository.findById(id)?.image ?: throw ApiException("Book not found!")
     }
 
+    /**
+     * Somente atributo bookId,userId,status
+     */
     suspend fun loanBook(bookLoaned: BookLoaned): Boolean {
         val loaned = loanRepository.findByBookIdAndUserIdAndStatusEquals(
             bookId = bookLoaned.bookId,
