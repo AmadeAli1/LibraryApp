@@ -82,4 +82,14 @@ class BookController(
         return bookService.addOrRemoveBookInBookmark(bookId = bookId, userId = userId)
     }
 
+    @GetMapping("/search")
+    suspend fun searchAllByAuthorOrTitle(
+        @RequestParam(
+            "authorOrTitle",
+            required = true
+        ) query: String,
+    ): Flow<BookResponse> {
+        return bookService.searchAllByAuthorOrTitle(author = query, title = query)
+    }
+
 }

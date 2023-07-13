@@ -12,4 +12,5 @@ interface BookRepository : CoroutineCrudRepository<Book, Int?> {
     suspend fun findBookByIsbn(isbn: String): Book?
     fun findAllByAvailable(available: Boolean): Flow<Book>
 
+    fun searchAllByAuthorOrTitle(author: String, title: String):Flow<Book>
 }

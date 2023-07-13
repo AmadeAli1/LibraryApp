@@ -114,5 +114,9 @@ class BookService(
         return bookmarkRepository.findAllByUserId(userId).map { it.toResponse(baseUrl) }
     }
 
+    suspend fun searchAllByAuthorOrTitle(author: String, title: String): Flow<BookResponse> {
+        return bookRepository.searchAllByAuthorOrTitle(author, title).map { it.toResponse(baseUrl) }
+    }
+
 
 }
