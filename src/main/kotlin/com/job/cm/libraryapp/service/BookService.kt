@@ -24,17 +24,13 @@ class BookService(
     private val bookRepository: BookRepository,
     private val loanRepository: LoanRepository,
     private val bookmarkRepository: BookmarkRepository,
-    private val environment: Environment,
     private val loanScheduler: LoanScheduler,
 ) {
-    private var baseUrl = environment["baseUrl"]!!
 
-    suspend fun postBook(book: Book, image: FilePart): Boolean {
+    suspend fun postBook(book: Book): Boolean {
         if (bookRepository.findBookByIsbn(book.isbn) != null) {
             throw ApiException("O livro ja existe!")
         }
-        val img = image.toByteArray()
-        book.image = img
         if (book.type != BookGenre.Academic) {
             book.subType = null
         }
@@ -44,22 +40,18 @@ class BookService(
 
     suspend fun findAll(): Flow<BookResponse> {
         return bookRepository.findAll().map {
-            it.toResponse(baseUrl)
+            it.toResponse()
         }
     }
 
     suspend fun findAllAvailableBooks(): Flow<BookResponse> {
         return bookRepository.findAllByAvailable(true).map {
-            it.toResponse(baseUrl)
+            it.toResponse()
         }
     }
 
     suspend fun findBookById(id: Int): BookResponse {
-        return bookRepository.findById(id)?.toResponse(baseUrl) ?: throw ApiException("Book not found")
-    }
-
-    suspend fun downloadBookImage(id: Int): ByteArray {
-        return bookRepository.findById(id)?.image ?: throw ApiException("Book not found!")
+        return bookRepository.findById(id)?.toResponse() ?: throw ApiException("Book not found")
     }
 
     /**
@@ -111,11 +103,11 @@ class BookService(
     }
 
     suspend fun findBookmarksByUserId(userId: Int): Flow<BookResponse> {
-        return bookmarkRepository.findAllByUserId(userId).map { it.toResponse(baseUrl) }
+        return bookmarkRepository.findAllByUserId(userId).map { it.toResponse() }
     }
 
     suspend fun searchAllByAuthorOrTitle(author: String, title: String): Flow<BookResponse> {
-        return bookRepository.searchAllByAuthorOrTitle(author, title).map { it.toResponse(baseUrl) }
+        return bookRepository.searchAllByAuthorOrTitle(author, title).map { it.toResponse() }
     }
 
 

@@ -1,7 +1,6 @@
 package com.job.cm.libraryapp.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.job.cm.libraryapp.exception.ApiException
 import com.job.cm.libraryapp.model.book.BookRequest
 import com.job.cm.libraryapp.model.book.BookResponse
 import com.job.cm.libraryapp.model.book.loan.BookLoaned
@@ -9,7 +8,6 @@ import com.job.cm.libraryapp.model.book.loan.BooksWithLoan
 import com.job.cm.libraryapp.service.BookService
 import jakarta.validation.Valid
 import kotlinx.coroutines.flow.Flow
-import org.springframework.http.codec.multipart.FilePart
 import org.springframework.web.bind.annotation.*
 
 
@@ -22,15 +20,9 @@ class BookController(
 
     @PostMapping("/post")
     suspend fun postBook(
-        @RequestPart("image", required = true) image: FilePart,
-        @RequestPart("book", required = true) body: String,
+        @Valid @RequestBody bookRequest: BookRequest,
     ): Boolean {
-        val bookRequest = try {
-            mapper.readValue(body, BookRequest::class.java)
-        } catch (e: Exception) {
-            throw ApiException(e.message ?: e.toString())
-        }
-        return bookService.postBook(book = bookRequest.toBook(), image = image)
+        return bookService.postBook(book = bookRequest.toBook())
     }
 
     @GetMapping("/all")

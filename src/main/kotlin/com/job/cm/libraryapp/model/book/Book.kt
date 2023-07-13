@@ -1,11 +1,7 @@
 package com.job.cm.libraryapp.model.book
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.validation.constraints.*
 import org.hibernate.validator.constraints.Length
-import org.springframework.context.annotation.Bean
-import org.springframework.core.env.Environment
-import org.springframework.core.env.get
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
@@ -55,9 +51,10 @@ data class Book(
     @Column("rating")
     @field:PositiveOrZero @field:Min(0) @field:Max(5)
     val rating: Int = 0,
-    @field:JsonIgnore
-    @Column("image")
-    var image: ByteArray? = null,
+    @Column("imageUrl")
+    @field:NotNull
+    @field:NotBlank
+    val imageUrl: String,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -70,7 +67,7 @@ data class Book(
         return id ?: 0
     }
 
-    fun toResponse(baseUrl:String): BookResponse {
+    fun toResponse(): BookResponse {
         return BookResponse(
             id = id!!,
             author = author,
@@ -86,7 +83,7 @@ data class Book(
             quantity = quantity,
             available = available,
             rating = rating,
-            imageUrl = "$baseUrl/api/storage/book/image/download?id=$id"
+            imageUrl = imageUrl
         )
     }
 }

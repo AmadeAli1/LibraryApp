@@ -32,7 +32,7 @@ create table if not exists books
     qty             integer           not null,
     available       boolean           not null,
     rating          integer default 0 not null,
-    image           bytea
+    imageUrl        text              not null
 );
 
 create table if not exists books_loaned

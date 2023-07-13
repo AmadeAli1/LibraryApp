@@ -29,7 +29,9 @@ data class BookRequest(
     val quantity: Int = 0,
     val available: Boolean = quantity > 1,
     @field:PositiveOrZero @field:Min(0) @field:Max(5)
-    val rating: Int = 0,
+    val rating: Int,
+    @field:NotBlank
+    val imageUrl: String,
 ) {
 
     fun toBook(): Book {
@@ -46,7 +48,7 @@ data class BookRequest(
             synopse = synopse,
             language = language,
             quantity = quantity,
-            available = available
-        )
+            available = available,
+            imageUrl = imageUrl)
     }
 }
