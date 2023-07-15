@@ -34,9 +34,9 @@ data class Book(
     val isbn: String,
     @Column("TYPE")
     @field:NotNull
-    val type: BookGenre,
+    val type: String,
     @Column("SUB_TYPE")
-    var subType: BookGenre.SubType? = null,
+    var subType: String? = null,
     @Column("SYNOPSE")
     @field:NotBlank @field:Length(min = 10)
     val synopse: String,
@@ -55,6 +55,8 @@ data class Book(
     @field:NotNull
     @field:NotBlank
     val imageUrl: String,
+    @Column("price")
+    val price: Int,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -83,7 +85,8 @@ data class Book(
             quantity = quantity,
             available = available,
             rating = rating,
-            imageUrl = imageUrl
+            imageUrl = imageUrl,
+            price = price
         )
     }
 }

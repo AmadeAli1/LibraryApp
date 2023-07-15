@@ -37,8 +37,6 @@ class LoanScheduler(
             }
         }
     }
-
-
     private fun LocalDateTime.toDate(): Date {
         return Calendar.getInstance().also {
             it.set(year, monthValue - 1, dayOfMonth, hour, minute, second)
@@ -46,4 +44,5 @@ class LoanScheduler(
             Date(this.timeInMillis)
         }
     }
+
 }

@@ -13,6 +13,9 @@ interface BookRepository : CoroutineCrudRepository<Book, Int?> {
     suspend fun findBookByIsbn(isbn: String): Book?
     fun findAllByAvailable(available: Boolean): Flow<Book>
 
-    @Query("select * from books where upper(authors) like upper(concat($1,'%')) or upper(title) like upper(concat($2,'%'))")
-    fun searchAllByAuthorOrTitle(author: String, title: String): Flow<Book>
+    @Query("select * from books where upper(authors) like upper(concat($1,'%')) or upper(title) like upper(concat($1,'%')) or upper(publisher) like upper(concat($1,'%')) or upper(type) like (upper(concat($1,'%')))")
+    fun search(query: String): Flow<Book>
+
+    fun findAllByRating(rating: Int): Flow<Book>
+
 }

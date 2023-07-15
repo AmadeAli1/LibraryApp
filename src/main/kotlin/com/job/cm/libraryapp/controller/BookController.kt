@@ -75,13 +75,27 @@ class BookController(
     }
 
     @GetMapping("/search")
-    suspend fun searchAllByAuthorOrTitle(
-        @RequestParam(
-            "authorOrTitle",
-            required = true
-        ) query: String,
+    suspend fun search(
+        @RequestParam("query", required = true) query: String,
     ): Flow<BookResponse> {
-        return bookService.searchAllByAuthorOrTitle(author = query, title = query)
+        return bookService.search(query)
     }
+
+    @GetMapping("/search/rating")
+    suspend fun searchAllByRating(
+        @RequestParam("rating", required = true) rating: Int,
+    ): Flow<BookResponse> {
+        return bookService.searchByRating(rating)
+    }
+
+    @GetMapping("/booking/add")
+    suspend fun addBooking(
+        @RequestParam("userId", required = true) userId: Int,
+        @RequestParam("bookId", required = true)
+        bookId: Int,
+    ): Boolean {
+        return bookService.addBooking(userId, bookId)
+    }
+
 
 }

@@ -2,21 +2,18 @@ package com.job.cm.libraryapp.service
 
 import com.job.cm.libraryapp.exception.ApiException
 import com.job.cm.libraryapp.model.book.Book
-import com.job.cm.libraryapp.model.book.BookGenre
 import com.job.cm.libraryapp.model.book.BookResponse
 import com.job.cm.libraryapp.model.book.Bookmark
+import com.job.cm.libraryapp.model.book.booking.Booking
 import com.job.cm.libraryapp.model.book.loan.BookLoaned
 import com.job.cm.libraryapp.model.book.loan.BooksWithLoan
 import com.job.cm.libraryapp.repository.BookRepository
+import com.job.cm.libraryapp.repository.BookingRepository
 import com.job.cm.libraryapp.repository.BookmarkRepository
 import com.job.cm.libraryapp.repository.LoanRepository
 import com.job.cm.libraryapp.scheduler.LoanScheduler
-import com.job.cm.libraryapp.utils.toByteArray
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
-import org.springframework.core.env.Environment
-import org.springframework.core.env.get
-import org.springframework.http.codec.multipart.FilePart
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.*
 import org.springframework.stereotype.Service
 
 @Service
@@ -25,14 +22,14 @@ class BookService(
     private val loanRepository: LoanRepository,
     private val bookmarkRepository: BookmarkRepository,
     private val loanScheduler: LoanScheduler,
+    private val bookingRepository: BookingRepository,
+    private val emailService: EmailService,
+    private val userService: UserService,
 ) {
 
     suspend fun postBook(book: Book): Boolean {
         if (bookRepository.findBookByIsbn(book.isbn) != null) {
             throw ApiException("O livro ja existe!")
-        }
-        if (book.type != BookGenre.Academic) {
-            book.subType = null
         }
         bookRepository.save(book)
         return true
@@ -86,6 +83,7 @@ class BookService(
         val book = bookRepository.findById(loaned.bookId) ?: throw ApiException("Livro nao encondrado")
         bookRepository.save(entity = book.copy(quantity = book.quantity + 1, available = true))
         loanRepository.save(entity = loaned.copy(status = BookLoaned.LoanStatus.Delivered))
+        notifyAll(bookId)
         return true
     }
 
@@ -103,11 +101,50 @@ class BookService(
     }
 
     suspend fun findBookmarksByUserId(userId: Int): Flow<BookResponse> {
-        return bookmarkRepository.findAllByUserId(userId).map { it.toResponse() }
+        return bookmarkRepository.findAllByUserId(userId).map(Book::toResponse)
     }
 
-    suspend fun searchAllByAuthorOrTitle(author: String, title: String): Flow<BookResponse> {
-        return bookRepository.searchAllByAuthorOrTitle(author, title).map { it.toResponse() }
+    suspend fun search(query: String): Flow<BookResponse> {
+        if (query.isBlank()) findAll()
+        return bookRepository.search(query).map(Book::toResponse)
+    }
+
+    suspend fun searchByRating(rating: Int): Flow<BookResponse> {
+        return bookRepository.findAllByRating(rating).map(Book::toResponse)
+    }
+
+    suspend fun addBooking(userId: Int, bookId: Int): Boolean {
+        val booking = bookingRepository.findAllByUserIdAndBookIdOrderById(
+            userId = userId,
+            bookId = bookId,
+        )
+
+        if (booking.count() == 0) {
+            bookingRepository.save(entity = Booking(userId = userId, bookId = bookId))
+            return true
+        }
+
+        val all = booking.toList().all { it.status == Booking.Status.Reservado }
+        if (all) {
+            bookingRepository.save(entity = Booking(userId = userId, bookId = bookId))
+            return true
+        }
+        throw ApiException("Ja efectou um booking para esse livro!")
+    }
+
+    suspend fun notifyAll(bookId: Int) {
+        bookingRepository
+            .findAllByBookIdAndStatusEqualsOrderById(bookId, Booking.Status.Reservado)
+            .map { bookingRepository.save(it.copy(status = Booking.Status.Concluido)) }
+            .flowOn(Dispatchers.IO)
+            .map { userService.findById(it.userId) }
+            .collect {
+                emailService.sendEmail(
+                    to = it.email,
+                    subject = "Biblioteca GRUPO 9 - Booking",
+                    content = "O livro ja #$bookId esta disponivel para alugar novamente! Seja rapido😂😂😂😂"
+                )
+            }
     }
 
 

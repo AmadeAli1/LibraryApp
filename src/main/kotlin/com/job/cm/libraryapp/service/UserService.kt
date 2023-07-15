@@ -38,4 +38,7 @@ class UserService(
         return "Usuario ${blockedUser.firstname} ${blockedUser.lastname} foi bloqueado"
     }
 
+    suspend fun findById(userId: Int): User {
+        return userRepository.findById(userId) ?: throw ApiException("User not found")
+    }
 }

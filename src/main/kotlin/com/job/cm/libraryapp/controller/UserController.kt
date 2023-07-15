@@ -12,7 +12,10 @@ class UserController(
 ) {
 
     @GetMapping("/login")
-    suspend fun login(@RequestParam("user") username: String, @RequestParam("password") password: String): Int {
+    suspend fun login(
+        @RequestParam("user") username: String,
+        @RequestParam("password") password: String,
+    ): Int {
         return userService.login(User.UserLogin(username, password))
     }
 

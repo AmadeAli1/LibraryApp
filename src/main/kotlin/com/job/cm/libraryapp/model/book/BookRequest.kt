@@ -19,8 +19,8 @@ data class BookRequest(
     @field:NotBlank @field:Length(max = 13, min = 10)
     val isbn: String = "",
     @field:NotNull
-    val type: BookGenre = BookGenre.Poetry,
-    var subType: BookGenre.SubType? = null,
+    val type: String,
+    var subType: String? = null,
     @field:NotBlank @field:Length(min = 10)
     val synopse: String = "",
     @field:NotNull
@@ -32,6 +32,8 @@ data class BookRequest(
     val rating: Int,
     @field:NotBlank
     val imageUrl: String,
+    @field:NotNull
+    val price: Int,
 ) {
 
     fun toBook(): Book {
@@ -49,6 +51,8 @@ data class BookRequest(
             language = language,
             quantity = quantity,
             available = available,
-            imageUrl = imageUrl)
+            imageUrl = imageUrl,
+            price = price
+        )
     }
 }

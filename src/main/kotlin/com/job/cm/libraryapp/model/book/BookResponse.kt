@@ -10,18 +10,15 @@ data class BookResponse(
     val yearOfPublish: Int,
     val numberOfPages: Int,
     val isbn: String,
-    val type: BookGenre,
-    var subType: BookGenre.SubType? = null,
+    val type: String,
+    var subType: String? = null,
     val synopse: String,
     val language: BookLanguage,
     val quantity: Int,
     val available: Boolean,
     val rating: Int,
     val imageUrl: String,
-){
+    val price: Int,
+) {
 
-    data class Bookmark(
-        @Column("userId")
-        val userId:Int
-    )
 }
